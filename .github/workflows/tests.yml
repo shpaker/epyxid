@@ -19,4 +19,4 @@ jobs:
           poetry install --no-root --no-ansi --with tests
           poetry run maturin develop
       - run:
-          pytest -v test_xid.py
+          poetry run pytest -v test_xid.py
