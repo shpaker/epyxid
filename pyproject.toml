@@ -44,8 +44,11 @@ macos-deployment-target = "11.0"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
+maturin = ">=1.0,<2.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.4.0"
 
 [tool.poetry.group.tests.dependencies]
-maturin = ">=1.0,<2.0"
 pytest = "^8.0.2"
 pytest-benchmark = "^4.0.0"
