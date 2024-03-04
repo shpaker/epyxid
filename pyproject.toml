@@ -1,0 +1,40 @@
+[project]
+name = "epyxid"
+version = "0.1.0"
+description = "Maturin Starter Project w/Poetry"
+authors = [ {name = "kfields", email = "kurtisfields@gmail.com"} ]
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+manifest-path = "Cargo.toml"
+module-name = "epyxid"
+python-source = "python"
+
+[tool.maturin.target."x86_64-apple-darwin"]
+macos-deployment-target = "10.12"
+
+[tool.maturin.target."aarch64-apple-darwin"]
+macos-deployment-target = "11.0"
+
+[tool.poetry]
+name = "epyxid"
+version = "0.1.0"
+description = "Maturin Starter Project w/PyO3 & Poetry"
+authors = ["foo <foo@bar.ru>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+
+[tool.poetry.dev-dependencies]
+maturin = ">=1.0,<2.0"
+pytest = "^8.0.2"
+pytest-benchmark = "^4.0.0"
