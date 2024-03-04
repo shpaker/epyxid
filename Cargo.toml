@@ -1,6 +1,6 @@
 [package]
 name = "epyxid"
-version = "0.1.1"
+version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -10,8 +10,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = "0.20.3"
+pyo3-ffi = { version = "^0.20.3", default_features = false, features = ["extension-module"]}
 xid = "1.0.3"
-log = "0.4.21"
 
 [features]
 extension-module = ["pyo3/extension-module"]

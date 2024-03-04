@@ -10,7 +10,7 @@ Python wrapper around Rust implementation of xid https://github.com/kazk/xid-rs
 pip install epyxid
 ```
 
-# Usage
+## Usage
 
 ```python
 from epyxid import XID
