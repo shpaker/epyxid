@@ -1,5 +1,7 @@
 # ePyXID
 
+[![PyPI](https://img.shields.io/pypi/v/epyxid.svg)](https://pypi.python.org/pypi/epyxid)
+
 Fast globally unique sortable id generator.
 
 Python wrapper around Rust implementation of xid https://github.com/kazk/xid-rs
