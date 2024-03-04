@@ -1,13 +1,30 @@
-[tool.poetry]
+[project]
 name = "epyxid"
-version = "0.1.0"
+version = "0.1.1"
+requires-python = ">=3.8"
 description = "Maturin Starter Project w/PyO3 & Poetry"
-authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
+authors = [
+  {name = "Aleksandr Shpak", email = "shpaker@gmail.com"},
+]
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+keywords = [
+  "rust",
+  "xid",
+  "pyo3",
+]
 classifiers = [
+  "License :: OSI Approved :: MIT License",
   "Programming Language :: Rust",
+  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
+[project.urls]
+Repository = "https://github.com/shpaker/epyxid"
+
+[tool.poetry]
 package-mode = false
 
 [build-system]
@@ -27,8 +44,11 @@ macos-deployment-target = "11.0"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
+maturin = ">=1.0,<2.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.4.0"
 
 [tool.poetry.group.tests.dependencies]
-maturin = ">=1.0,<2.0"
 pytest = "^8.0.2"
 pytest-benchmark = "^4.0.0"

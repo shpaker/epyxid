@@ -1,40 +1,16 @@
 use std::str::FromStr;
 
-use pyo3::exceptions::PyValueError;
 use pyo3::types::{PyBytes, PyDateTime};
 use pyo3::{pyclass, pymethods, PyResult, Python};
-use xid::{Id, ParseIdError};
-
-pyo3::create_exception!(mymodule, XIDError, PyValueError);
+use xid::Id;
 
 #[pyclass]
 pub struct XID {
-    inner: Id,
+    pub inner: Id,
 }
 
 #[pymethods]
 impl XID {
-    #[staticmethod]
-    fn create() -> PyResult<XID> {
-        Ok(XID { inner: xid::new() })
-    }
-
-    #[staticmethod]
-    fn from_str(s: &str) -> PyResult<XID> {
-        match Id::from_str(s) {
-            Ok(id) => Ok(XID { inner: id }),
-            Err(error) => Err(XIDError::new_err(error.to_string())),
-        }
-    }
-
-    #[staticmethod]
-    fn from_bytes(b: &PyBytes) -> PyResult<XID> {
-        match id_from_bytes(b.as_bytes()) {
-            Ok(value) => Ok(XID { inner: value }),
-            Err(error) => Err(XIDError::new_err(error.to_string())),
-        }
-    }
-
     fn as_bytes<'p>(&self, _py: Python<'p>) -> &'p PyBytes {
         PyBytes::new(_py, self.inner.as_bytes())
     }
@@ -99,14 +75,5 @@ impl XID {
 
     fn __ge__(&self, object: &XID) -> bool {
         self.to_str() >= object.to_str()
-    }
-}
-
-fn id_from_bytes(s: &[u8]) -> Result<Id, ParseIdError> {
-    if s.len() != 12 {
-        Err(ParseIdError::InvalidLength(s.len()))
-    } else {
-        let value = unsafe { &*(s as *const [u8] as *const [u8; 12]) };
-        Ok(Id(*value))
     }
 }

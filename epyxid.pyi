@@ -3,26 +3,8 @@ from datetime import datetime
 
 class XID:
     """
-    Globally unique sortable id generator.
+    Globally unique sortable id.
     """
-
-    @staticmethod
-    def create() -> 'XID':
-        """
-        Generate a new globally unique id.
-        """
-
-    @staticmethod
-    def from_str(s: str) -> 'XID':
-      """
-      Create an id from its string representation.
-      """
-
-    @staticmethod
-    def from_bytes(b: bytes) -> 'XID':
-      """
-      Create an id from bytes.
-      """
 
     def as_bytes(self) -> bytes:
         """
@@ -75,3 +57,21 @@ class XID:
     def __gt__(self, object: 'XID') -> bool: ...
 
     def __ge__(self, object: 'XID') -> bool: ...
+
+
+def xid_create() -> XID:
+    """
+    Generate a new globally unique id.
+    """
+
+
+def xid_from_str(s: str) -> XID:
+    """
+    Create an id from its string representation.
+    """
+
+
+def xid_from_bytes(b: bytes) -> XID:
+    """
+    Create an id from bytes.
+    """

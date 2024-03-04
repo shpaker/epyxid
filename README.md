@@ -15,9 +15,9 @@ pip install epyxid
 ## Usage
 
 ```python
-from epyxid import XID
+from epyxid import XID, xid_create
 
-xid = XID.create()
+xid: XID = xid_create()
 print(xid)
 # cnisffq7qo0qnbtbu5gg
 print(bytes(xid))
