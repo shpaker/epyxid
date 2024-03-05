@@ -1,11 +1,11 @@
 [project]
 name = "epyxid"
-version = "0.1.2"
-requires-python = ">=3.8"
 description = "Python wrapper around Rust implementation of XID (Globally Unique ID Generator)"
+requires-python = ">=3.8"
 authors = [
   {name = "Aleksandr Shpak", email = "shpaker@gmail.com"},
 ]
+version = "0.1.3"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
 keywords = [
@@ -16,16 +16,18 @@ keywords = [
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Rust",
+  "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: MacOS",
+  "Typing :: Typed",
 ]
 
 [project.urls]
 Repository = "https://github.com/shpaker/epyxid"
-
-[tool.poetry]
-package-mode = false
 
 [build-system]
 requires = ["maturin>=1.0,<2.0"]
@@ -41,14 +43,3 @@ macos-deployment-target = "10.12"
 
 [tool.maturin.target."aarch64-apple-darwin"]
 macos-deployment-target = "11.0"
-
-[tool.poetry.dependencies]
-python = ">=3.8"
-maturin = ">=1.0,<2.0"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.4.0"
-
-[tool.poetry.group.tests.dependencies]
-pytest = "^8.0.2"
-pytest-benchmark = "^4.0.0"
