@@ -36,11 +36,6 @@ jobs:
           args: --release --out dist --interpreter python3.10
           sccache: 'true'
           manylinux: auto
-      - name: Upload wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: dist
       - name: pytest
         if: ${{ startsWith(matrix.target, 'x86_64') }}
         shell: bash
@@ -60,9 +55,14 @@ jobs:
             apt-get install -y --no-install-recommends python3 python3-pip
             pip3 install -U pip pytest
           run: |
-            pip3 install epyxid --find-links dist --force-reinstall
+            pip3 install --no-index --find-links dist/ --force-reinstall epyxid
             pip install pytest
             pytest
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: dist
 
   windows:
     runs-on: windows-latest
@@ -81,11 +81,6 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --interpreter python3.10
           sccache: 'true'
-      - name: Upload wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: dist
       - name: pytest
         if: ${{ !startsWith(matrix.target, 'aarch64') }}
         shell: bash
@@ -93,6 +88,11 @@ jobs:
           pip install --no-index --find-links dist/ --force-reinstall epyxid
           pip install pytest
           pytest
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: dist
 
   macos:
     runs-on: macos-latest
@@ -110,11 +110,6 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --interpreter python3.10
           sccache: 'true'
-      - name: Upload wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: dist
       - name: pytest
         if: ${{ !startsWith(matrix.target, 'aarch64') }}
         shell: bash
@@ -122,6 +117,11 @@ jobs:
           pip install --no-index --find-links dist/ --force-reinstall epyxid
           pip install pytest
           pytest
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: dist
 
   sdist:
     runs-on: ubuntu-latest
