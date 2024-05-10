@@ -1,5 +1,7 @@
 from datetime import datetime
 
+__version__: str
+
 
 class XID:
     """
@@ -39,6 +41,8 @@ class XID:
         """
         Extract the incrementing counter.
         """
+
+    def __hash__(self) -> int: ...
 
     def __bytes__(self) -> bytes: ...
 

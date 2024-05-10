@@ -30,6 +30,11 @@ def test_from_bytes_valid() -> None:
     assert str(xid) == XID_STR
 
 
+def test_hash() -> None:
+    xid = xid_from_bytes(XID_BYTES)
+    assert isinstance(hash(xid), int)
+
+
 def test_from_bytes_invalid_length() -> None:
     with raises(ValueError):
         xid_from_bytes(bytes([0x4d, 0x88, 0xe1, 0x5b, 0x60, 0xf4, 0x86, 0xe4, 0x28, 0x41, 0x2d]))

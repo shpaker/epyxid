@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
+use pyo3::prelude::PyBytesMethods;
 use pyo3::types::PyBytes;
-use pyo3::{pyfunction, PyResult};
+use pyo3::{pyfunction, Bound, PyResult};
 use xid::{Id, ParseIdError};
 
 use crate::errors::XIDError;
@@ -9,21 +10,21 @@ use crate::wrapper::XID;
 
 #[pyfunction]
 pub fn xid_create() -> PyResult<XID> {
-    Ok(XID { inner: xid::new() })
+    Ok(XID(xid::new()))
 }
 
 #[pyfunction]
 pub fn xid_from_str(s: &str) -> PyResult<XID> {
     match Id::from_str(s) {
-        Ok(id) => Ok(XID { inner: id }),
+        Ok(id) => Ok(XID(id)),
         Err(error) => Err(XIDError::new_err(error.to_string())),
     }
 }
 
 #[pyfunction]
-pub fn xid_from_bytes(b: &PyBytes) -> PyResult<XID> {
+pub fn xid_from_bytes(b: Bound<PyBytes>) -> PyResult<XID> {
     match id_from_bytes(b.as_bytes()) {
-        Ok(value) => Ok(XID { inner: value }),
+        Ok(value) => Ok(XID(value)),
         Err(error) => Err(XIDError::new_err(error.to_string())),
     }
 }
