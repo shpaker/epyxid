@@ -2,8 +2,14 @@
 
 build:
   maturin build \
-    --interpreter python3.8
+    --find-interpreter
+
+venv:
+  source venv/bin/activate
 
 tests:
   maturin develop
-  pytest -v test_xid.py
+  set -e
+  python3.8 -m pip install epyxid --find-links dist --force-reinstall
+  python3.8 -m pip install pytest
+  python3.8 -m pytest -v test_xid.py
