@@ -10,6 +10,5 @@ venv:
 tests:
   maturin develop
   set -e
-  python3.8 -m pip install epyxid --find-links dist --force-reinstall
   python3.8 -m pip install pytest
   python3.8 -m pytest -v test_xid.py
