@@ -33,7 +33,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --interpreter python3
+          args: --release --out dist --interpreter python3.10
           sccache: 'true'
           manylinux: auto
       - name: Upload wheels
@@ -80,7 +80,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --interpreter python3
+          args: --release --out dist --interpreter python3.10
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -110,7 +110,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --interpreter python3
+          args: --release --out dist --interpreter python3.10
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
