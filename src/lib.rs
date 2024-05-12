@@ -1,3 +1,5 @@
+extern crate core;
+
 use pyo3::prelude::{pymodule, wrap_pyfunction, Bound, PyModule, PyResult, Python};
 
 use crate::errors::XIDError;

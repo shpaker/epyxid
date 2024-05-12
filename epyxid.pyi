@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional, Union
 
 __version__: str
 
@@ -7,6 +8,9 @@ class XID:
     """
     Globally unique sortable id.
     """
+
+    def __new__(cls, value: Optional[Union[str, bytes]] = None):
+        pass
 
     def as_bytes(self) -> bytes:
         """
