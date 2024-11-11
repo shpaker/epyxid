@@ -1,17 +1,16 @@
+use crate::utils::{xid_create, xid_from_bytes, xid_from_str};
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-use crate::utils::{xid_create, xid_from_bytes, xid_from_str};
-
-use pyo3::types::{PyBytes, PyDateTime, PyString};
+use pyo3::types::{PyBytes, PyDateTime};
 use pyo3::{pyclass, pymethods, Bound, FromPyObject, PyResult, Python};
 use xid::Id;
 
 #[derive(FromPyObject)]
-enum XIDReprTypes<'a> {
+enum XIDReprTypes {
     #[pyo3(transparent, annotation = "str")]
-    String(&'a PyString),
+    String(String),
     #[pyo3(transparent, annotation = "bytes")]
-    Bytes(&'a PyBytes),
+    Bytes(Vec<u8>),
 }
 
 #[pyclass]
@@ -20,14 +19,13 @@ pub struct XID(pub Id);
 #[pymethods]
 impl XID {
     #[new]
-    fn new<'p>(py: Python<'p>, data: Option<XIDReprTypes>) -> PyResult<XID> {
+    #[pyo3(signature = (data=None))]
+    fn py_new(data: Option<XIDReprTypes>) -> PyResult<XID> {
         match data {
             None => xid_create(),
             Some(repr_value) => match repr_value {
-                XIDReprTypes::String(value) => xid_from_str(value.to_str().unwrap()),
-                XIDReprTypes::Bytes(value) => {
-                    xid_from_bytes(PyBytes::new_bound(py, value.as_bytes()))
-                }
+                XIDReprTypes::String(value) => xid_from_str(value.as_str()),
+                XIDReprTypes::Bytes(value) => xid_from_bytes(value),
             },
         }
     }

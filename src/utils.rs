@@ -1,8 +1,6 @@
 use std::str::FromStr;
 
-use pyo3::prelude::PyBytesMethods;
-use pyo3::types::PyBytes;
-use pyo3::{pyfunction, Bound, PyResult};
+use pyo3::{pyfunction, PyResult};
 use xid::{Id, ParseIdError};
 
 use crate::errors::XIDError;
@@ -22,8 +20,8 @@ pub fn xid_from_str(s: &str) -> PyResult<XID> {
 }
 
 #[pyfunction]
-pub fn xid_from_bytes(b: Bound<PyBytes>) -> PyResult<XID> {
-    match id_from_bytes(b.as_bytes()) {
+pub fn xid_from_bytes(b: Vec<u8>) -> PyResult<XID> {
+    match id_from_bytes(&b) {
         Ok(value) => Ok(XID(value)),
         Err(error) => Err(XIDError::new_err(error.to_string())),
     }
