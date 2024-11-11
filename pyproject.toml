@@ -5,7 +5,7 @@ requires-python = ">=3.8"
 authors = [
   {name = "Aleksandr Shpak", email = "shpaker@gmail.com"},
 ]
-version = "0.3.0"
+version = "0.3.1"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
 keywords = [
