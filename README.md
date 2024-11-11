@@ -1,6 +1,7 @@
 # ePyXID
 
 [![PyPI](https://img.shields.io/pypi/v/epyxid.svg)](https://pypi.python.org/pypi/epyxid)
+[![PyPI](https://img.shields.io/pypi/dm/epyxid.svg)](https://pypi.python.org/pypi/epyxid)
 
 Fast globally unique sortable id generator.
 
@@ -15,9 +16,9 @@ pip install epyxid
 ## Usage
 
 ```python
-from epyxid import XID, xid_create
+from epyxid import XID
 
-xid: XID = xid_create()
+xid: XID = XID()
 print(xid)
 # cnisffq7qo0qnbtbu5gg
 print(bytes(xid))
