@@ -1,6 +1,8 @@
 extern crate core;
 
-use pyo3::prelude::{pymodule, wrap_pyfunction, Bound, PyModule, PyResult, Python};
+use pyo3::prelude::{
+    pymodule, wrap_pyfunction, Bound, PyModule, PyModuleMethods, PyResult, Python,
+};
 
 use crate::errors::XIDError;
 use crate::utils::{xid_create, xid_from_bytes, xid_from_str};
