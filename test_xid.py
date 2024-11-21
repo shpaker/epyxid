@@ -1,6 +1,7 @@
 from typing import Union, Optional
 
-from epyxid import xid_from_bytes, xid_from_str, xid_create, XID
+from epyxid import xid_from_bytes, xid_create, XID, XIDError, xid_from_str
+
 from pytest import raises, param, mark
 
 XID_STR = '9m4e2mr0ui3e8a215n4g'
@@ -30,9 +31,14 @@ def test_create_cls_param(value: Optional[Union[str, bytes]], ) -> None:
     assert xid is not None
 
 
-def test_create_cls_error() -> None:
+def test_create_cls_type_error() -> None:
     with raises(TypeError):
         xid = XID(42)
+
+
+def test_create_cls_xid_error() -> None:
+    with raises(XIDError):
+        xid = XID('42')
 
 
 def test_from_str_valid() -> None:

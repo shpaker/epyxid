@@ -8,7 +8,7 @@ use crate::errors::XIDError;
 use crate::utils::{xid_create, xid_from_bytes, xid_from_str};
 use crate::wrapper::XID;
 
-const PY_MODULE_VERSION: &str = "0.3.0";
+const PY_MODULE_VERSION: &str = "0.3.2";
 
 mod errors;
 mod utils;
