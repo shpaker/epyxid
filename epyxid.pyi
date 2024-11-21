@@ -4,6 +4,10 @@ from typing import Optional, Union
 __version__: str
 
 
+class XIDError(ValueError):
+    pass
+
+
 class XID:
     """
     Globally unique sortable id.
