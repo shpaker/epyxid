@@ -2,6 +2,11 @@
 name = "epyxid"
 version = "0.3.3"
 edition = "2021"
+description = "Python wrapper around the Rust implementation of xid"
+license = "MIT"
+repository = "https://github.com/als/epyxid"
+documentation = "https://docs.rs/epyxid"
+homepage = "https://github.com/als/epyxid"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
