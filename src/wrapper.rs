@@ -31,7 +31,7 @@ impl XID {
     }
 
     fn as_bytes<'p>(&self, _py: Python<'p>) -> Bound<'p, PyBytes> {
-        PyBytes::new_bound(_py, self.0.as_bytes())
+        PyBytes::new(_py, self.0.as_bytes())
     }
 
     fn to_str(&self) -> String {
@@ -40,7 +40,7 @@ impl XID {
 
     #[getter]
     fn machine<'p>(&self, _py: Python<'p>) -> Bound<'p, PyBytes> {
-        PyBytes::new_bound(_py, &self.0.machine())
+        PyBytes::new(_py, &self.0.machine())
     }
 
     #[getter]
@@ -52,7 +52,7 @@ impl XID {
     fn time<'p>(&self, _py: Python<'p>) -> PyResult<Bound<'p, PyDateTime>> {
         let raw = self.0.as_bytes();
         let unix_ts = u32::from_be_bytes([raw[0], raw[1], raw[2], raw[3]]);
-        PyDateTime::from_timestamp_bound(_py, unix_ts as f64, None)
+        PyDateTime::from_timestamp(_py, unix_ts as f64, None)
     }
 
     #[getter]
