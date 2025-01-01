@@ -1,7 +1,12 @@
 [package]
 name = "epyxid"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
+description = "Python wrapper around the Rust implementation of xid"
+license = "MIT"
+repository = "https://github.com/als/epyxid"
+documentation = "https://docs.rs/epyxid"
+homepage = "https://github.com/als/epyxid"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -9,7 +14,7 @@ name = "epyxid"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.22.6", features = ["extension-module"] }
+pyo3 = { version = "0.23.3", features = ["extension-module"] }
 xid = "1.1.1"
 
 [profile.release]
