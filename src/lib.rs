@@ -20,7 +20,7 @@ fn epyxid(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(xid_create, m)?)?;
     m.add_function(wrap_pyfunction!(xid_from_str, m)?)?;
     m.add_function(wrap_pyfunction!(xid_from_bytes, m)?)?;
-    m.add("XIDError", py.get_type::<XIDError>())?;
+    m.add("XIDError", py.get_type_bound::<XIDError>())?;
     m.add("__version__", PY_MODULE_VERSION)?;
     Ok(())
 }
