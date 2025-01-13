@@ -36,7 +36,6 @@ build-backend = "maturin"
 [tool.maturin]
 manifest-path = "Cargo.toml"
 module-name = "epyxid"
-python-source = "python"
 
 [tool.maturin.target."x86_64-apple-darwin"]
 macos-deployment-target = "10.12"
