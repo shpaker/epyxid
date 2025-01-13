@@ -14,7 +14,7 @@ name = "epyxid"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.23.3", features = ["extension-module"] }
+pyo3 = { version = "^0.23", features = ["extension-module"] }
 xid = "1.1.1"
 
 [profile.release]
