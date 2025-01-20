@@ -32,11 +32,11 @@ from epyxid import XID
 xid = XID()
 
 # Create an XID from a string
-xid_str = XID.from_string("cnisffq7qo0qnbtbu5gg")
+xid_str = XID("cnisffq7qo0qnbtbu5gg")
 print(f"XID from string: {xid_str}")
 
 # Create an XID from bytes
-xid_bytes = XID.from_bytes(b'e\xe5\xc7\xbfG\xd6\x01\xab\xaf\xab\xf1a')
+xid_bytes = XID(b'e\xe5\xc7\xbfG\xd6\x01\xab\xaf\xab\xf1a')
 print(f"XID from bytes: {xid_bytes}")
 
 # Print the XID as a string
