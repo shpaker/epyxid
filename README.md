@@ -30,6 +30,8 @@ from epyxid import XID
 
 # Create a new XID
 xid = XID()
+print(f"{xid!r}")
+# <XID: cu701mcr9ij74n2hajpg>
 
 # Create an XID from a string
 xid_str = XID("cnisffq7qo0qnbtbu5gg")
@@ -41,20 +43,23 @@ print(f"XID from bytes: {xid_bytes}")
 
 # Print the XID as a string
 print(f"XID: {str(xid)}")
-# Example output: XID: cnisffq7qo0qnbtbu5gg
+#  or
+print(f"XID: {xid.to_str()}")
+# XID: cnisffq7qo0qnbtbu5gg
 
 # Get the byte representation of the XID
 print(f"Bytes: {bytes(xid)}")
-# Example output: Bytes: b'e\xe5\xc7\xbfG\xd6\x01\xab\xaf\xab\xf1a'
+# or
+print(f"Bytes: {xid.as_bytes()}")
+# Bytes: b'e\xe5\xc7\xbfG\xd6\x01\xab\xaf\xab\xf1a'
 
 # Access the creation time of the XID
 print(f"Creation Time: {xid.time}")
-# Example output: Creation Time: 2024-03-04 16:08:15
-
-xid1 = XID()
-xid2 = XID()
+# Creation Time: 2024-12-31 23:59:59
 
 # Compare XIDs
+xid1 = XID()
+xid2 = XID()
 print(f"XID1 < XID2: {xid1 < xid2}")
 
 # Use XIDs in a set
