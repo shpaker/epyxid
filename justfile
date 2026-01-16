@@ -5,6 +5,6 @@ venv:
 
 tests:
   maturin build --out dist --interpreter python
-  python3.8 -m pip install --no-index --find-links dist/ --force-reinstall epyxid
-  python3.8 -m pip install pytest
-  python3.8 -m pytest -v test_xid.py
+  python -m pip install --no-index --find-links dist/ --force-reinstall epyxid
+  python -m pip install pytest
+  python -m pytest -v test_xid.py
