@@ -14,6 +14,7 @@ enum XIDReprTypes {
 }
 
 #[pyclass]
+#[allow(clippy::upper_case_acronyms)]
 pub struct XID(pub Id);
 
 #[pymethods]
