@@ -5,13 +5,15 @@
 
 Fast, globally unique, and sortable ID generator.
 
-ePyXID is a Python wrapper around the Rust implementation of xid: [xid-rs](https://github.com/kazk/xid-rs). It provides a simple and efficient way to generate unique IDs that are sortable by creation time.
+ePyXID is a Python wrapper around the Rust implementation of xid: [xid-rs](https://github.com/kazk/xid-rs). Built with [PyO3](https://pyo3.rs/), it provides a simple and efficient way to generate unique IDs that are sortable by creation time.
+
+The original xid implementation is [rs/xid](https://github.com/rs/xid) written in Go.
 
 ## Features
 
 - **Globally Unique**: Each ID is unique across space and time.
 - **Sortable**: IDs are sortable by their creation time.
-- **Fast**: Implemented in Rust for maximum performance.
+- **Fast**: Implemented in Rust for maximum performance using PyO3. See [performance benchmarks](https://github.com/shpaker/python-id-benchmarks) comparing ePyXID with other Python ID generation libraries.
 
 ## Installation
 

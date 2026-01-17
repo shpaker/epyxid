@@ -1,6 +1,7 @@
 use crate::utils::{xid_create, xid_from_bytes, xid_from_str};
 use std::hash::{DefaultHasher, Hash, Hasher};
 
+use pyo3::types::PyAny;
 use pyo3::types::{PyBytes, PyDateTime};
 use pyo3::{pyclass, pymethods, Bound, FromPyObject, PyResult, Python};
 use xid::Id;
@@ -73,28 +74,72 @@ impl XID {
         format!("<XID: {}>", self.to_str())
     }
 
-    fn __eq__(&self, object: &XID) -> bool {
-        self.to_str() == object.to_str()
+    fn __eq__(&self, other: &Bound<'_, PyAny>) -> PyResult<bool> {
+        match other.cast::<XID>() {
+            Ok(xid) => {
+                let borrowed = xid.borrow();
+                Ok(self.0.as_bytes() == borrowed.0.as_bytes())
+            }
+            Err(_) => Ok(false),
+        }
     }
 
-    fn __ne__(&self, object: &XID) -> bool {
-        self.to_str() != object.to_str()
+    fn __ne__(&self, other: &Bound<'_, PyAny>) -> PyResult<bool> {
+        match other.cast::<XID>() {
+            Ok(xid) => {
+                let borrowed = xid.borrow();
+                Ok(self.0.as_bytes() != borrowed.0.as_bytes())
+            }
+            Err(_) => Ok(true),
+        }
     }
 
-    fn __lt__(&self, object: &XID) -> bool {
-        self.to_str() < object.to_str()
+    fn __lt__(&self, other: &Bound<'_, PyAny>) -> PyResult<bool> {
+        match other.cast::<XID>() {
+            Ok(xid) => {
+                let borrowed = xid.borrow();
+                Ok(self.0.as_bytes() < borrowed.0.as_bytes())
+            }
+            Err(_) => Err(pyo3::exceptions::PyTypeError::new_err(
+                "'<' not supported between instances of 'XID' and other types",
+            )),
+        }
     }
 
-    fn __le__(&self, object: &XID) -> bool {
-        self.to_str() <= object.to_str()
+    fn __le__(&self, other: &Bound<'_, PyAny>) -> PyResult<bool> {
+        match other.cast::<XID>() {
+            Ok(xid) => {
+                let borrowed = xid.borrow();
+                Ok(self.0.as_bytes() <= borrowed.0.as_bytes())
+            }
+            Err(_) => Err(pyo3::exceptions::PyTypeError::new_err(
+                "'<=' not supported between instances of 'XID' and other types",
+            )),
+        }
     }
 
-    fn __gt__(&self, object: &XID) -> bool {
-        self.to_str() > object.to_str()
+    fn __gt__(&self, other: &Bound<'_, PyAny>) -> PyResult<bool> {
+        match other.cast::<XID>() {
+            Ok(xid) => {
+                let borrowed = xid.borrow();
+                Ok(self.0.as_bytes() > borrowed.0.as_bytes())
+            }
+            Err(_) => Err(pyo3::exceptions::PyTypeError::new_err(
+                "'>' not supported between instances of 'XID' and other types",
+            )),
+        }
     }
 
-    fn __ge__(&self, object: &XID) -> bool {
-        self.to_str() >= object.to_str()
+    fn __ge__(&self, other: &Bound<'_, PyAny>) -> PyResult<bool> {
+        match other.cast::<XID>() {
+            Ok(xid) => {
+                let borrowed = xid.borrow();
+                Ok(self.0.as_bytes() >= borrowed.0.as_bytes())
+            }
+            Err(_) => Err(pyo3::exceptions::PyTypeError::new_err(
+                "'>=' not supported between instances of 'XID' and other types",
+            )),
+        }
     }
 
     fn __hash__(&self) -> u64 {

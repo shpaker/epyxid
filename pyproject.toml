@@ -5,7 +5,7 @@ requires-python = ">=3.8"
 authors = [
   {name = "Aleksandr Shpak", email = "shpaker@gmail.com"},
 ]
-version = "0.3.4"
+version = "0.3.5"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
 keywords = [
@@ -14,19 +14,31 @@ keywords = [
   "pyo3",
 ]
 classifiers = [
+  "Development Status :: 5 - Production/Stable",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Rust",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "Operating System :: POSIX :: Linux",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: MacOS",
   "Typing :: Typed",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
 [project.urls]
+Homepage = "https://github.com/shpaker/epyxid"
 Repository = "https://github.com/shpaker/epyxid"
 
 [build-system]
