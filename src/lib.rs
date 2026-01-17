@@ -1,5 +1,3 @@
-extern crate core;
-
 use pyo3::prelude::{
     pymodule, wrap_pyfunction, Bound, PyModule, PyModuleMethods, PyResult, Python,
 };
@@ -8,7 +6,7 @@ use crate::errors::XIDError;
 use crate::utils::{xid_create, xid_from_bytes, xid_from_str};
 use crate::wrapper::XID;
 
-const PY_MODULE_VERSION: &str = "0.3.4";
+const PY_MODULE_VERSION: &str = "0.3.5";
 
 mod errors;
 mod utils;

@@ -1,12 +1,24 @@
 [package]
 name = "epyxid"
-version = "0.3.4"
+version = "0.3.5"
 edition = "2021"
-description = "Python wrapper around the Rust implementation of xid"
+description = "Python wrapper around Rust implementation of XID (Globally Unique ID Generator)"
 license = "MIT"
-repository = "https://github.com/als/epyxid"
-documentation = "https://docs.rs/epyxid"
-homepage = "https://github.com/als/epyxid"
+repository = "https://github.com/shpaker/epyxid"
+homepage = "https://github.com/shpaker/epyxid"
+authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
+keywords = ["xid", "pyo3"]
+exclude = [
+    "target/",
+    "venv/",
+    ".github/",
+    "*.pyc",
+    "__pycache__/",
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    "justfile",
+    "test_xid.py",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -20,3 +32,5 @@ xid = "1.1.1"
 [profile.release]
 lto = true
 codegen-units = 1
+opt-level = 3
+strip = true

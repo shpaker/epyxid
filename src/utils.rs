@@ -31,6 +31,7 @@ fn id_from_bytes(s: &[u8]) -> Result<Id, ParseIdError> {
     if s.len() != 12 {
         return Err(ParseIdError::InvalidLength(s.len()));
     }
-    let value = unsafe { &*(s as *const [u8] as *const [u8; 12]) };
-    Ok(Id(*value))
+    let mut value = [0u8; 12];
+    value.copy_from_slice(s);
+    Ok(Id(value))
 }
