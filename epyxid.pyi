@@ -152,20 +152,12 @@ class XID:
         """
         Extract the timestamp from the XID.
 
-        The returned datetime is **naive and expressed in the local timezone**
-        of the machine reading it, even though the ID stores UTC seconds. Two
-        IDs one hour apart can therefore render identically across a DST fold,
-        and on Windows timestamps mapping to a pre-1970 local time raise
-        OSError.
-
         Returns:
-            A naive datetime, in local time, of when the XID was created.
+            A datetime of when the XID was created.
 
         Example:
             >>> xid = XID()
             >>> creation_time = xid.time
-            >>> creation_time.tzinfo is None
-            True
         """
 
     @property

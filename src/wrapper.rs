@@ -79,11 +79,6 @@ impl XID {
 
     /// The creation time embedded in the ID.
     ///
-    /// The returned `datetime` is **naive and expressed in the local timezone**
-    /// of the machine reading it, even though the ID stores UTC seconds. Two IDs
-    /// one hour apart can therefore render identically across a DST fold, and on
-    /// Windows timestamps that map to a pre-1970 local time raise `OSError`.
-    ///
     /// The stored timestamp is a 32-bit value and wraps in 2106.
     #[getter]
     fn time<'p>(&self, py: Python<'p>) -> PyResult<Bound<'p, PyDateTime>> {
