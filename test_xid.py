@@ -6,7 +6,6 @@ from datetime import datetime
 from importlib.metadata import version
 from threading import Lock, Thread
 from subprocess import check_output
-from typing import Union, Optional
 
 from epyxid import __version__, xid_from_bytes, xid_create, XID, XIDError, xid_from_str
 
@@ -47,7 +46,7 @@ def test_create_xid(creator) -> None:
         param(XID_STR),
     ],
 )
-def test_create_xid_with_params(value: Optional[Union[str, bytes]]) -> None:
+def test_create_xid_with_params(value: str | bytes) -> None:
     parsed = XID(value)
     assert bytes(parsed) == XID_BYTES
     assert str(parsed) == XID_STR
@@ -304,7 +303,7 @@ def test_generated_ids_are_unique() -> None:
 
 
 def test_generated_ids_are_unique_across_threads() -> None:
-    results: 'list[list[str]]' = []
+    results: list[list[str]] = []
     lock = Lock()
 
     def worker() -> None:

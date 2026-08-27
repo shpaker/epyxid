@@ -8,7 +8,7 @@ URL: https://github.com/shpaker/epyxid
 """
 
 from datetime import datetime
-from typing import Final, Optional, Union, final
+from typing import Final, final
 
 __version__: Final[str]
 __all__ = [
@@ -61,7 +61,7 @@ class XID:
         b'M\\x88\\xe1[`\\xf4\\x86\\xe4(A-\\xc9'
     """
 
-    def __new__(cls, value: Optional[Union[str, bytes]] = None) -> "XID":
+    def __new__(cls, value: str | bytes | None = None) -> "XID":
         """
         Create a new XID instance.
 

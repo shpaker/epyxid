@@ -2,7 +2,7 @@
 
 venv:
   python3 -m venv .venv
-  .venv/bin/python -m pip install --upgrade "maturin>=1.9,<2.0" "pytest>=8.3,<9" mypy
+  .venv/bin/python -m pip install --upgrade "maturin>=1.9,<2.0" "pytest>=8.3" mypy
 
 tests:
   rm -rf target/wheels

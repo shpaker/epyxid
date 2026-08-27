@@ -42,7 +42,7 @@ jobs:
         if: matrix.target == 'x86_64'
         run: |
           python -m pip install --no-index --force-reinstall dist/epyxid-*.whl
-          python -m pip install "pytest>=8.3,<9"
+          python -m pip install "pytest>=8.3"
           python -m pytest -q test_xid.py
       - name: Upload wheels
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -68,7 +68,7 @@ jobs:
       - name: Smoke test the wheel
         run: |
           python -m pip install --no-index --force-reinstall dist/epyxid-*.whl
-          python -m pip install "pytest>=8.3,<9"
+          python -m pip install "pytest>=8.3"
           python -m pytest -q test_xid.py
       - name: Upload wheels
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -124,7 +124,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install --no-index --force-reinstall dist/epyxid-*.whl
-          python -m pip install "pytest>=8.3,<9"
+          python -m pip install "pytest>=8.3"
           python -m pytest -q test_xid.py
       - name: Upload wheels
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -155,7 +155,7 @@ jobs:
         if: matrix.target == 'aarch64'
         run: |
           python -m pip install --no-index --force-reinstall dist/epyxid-*.whl
-          python -m pip install "pytest>=8.3,<9"
+          python -m pip install "pytest>=8.3"
           python -m pytest -q test_xid.py
       - name: Upload wheels
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -179,7 +179,7 @@ jobs:
       - name: Build and test from the sdist
         run: |
           python -m pip install --force-reinstall dist/epyxid-*.tar.gz
-          python -m pip install "pytest>=8.3,<9"
+          python -m pip install "pytest>=8.3"
           python -m pytest -q test_xid.py
       - name: Upload sdist
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
