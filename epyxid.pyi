@@ -8,9 +8,9 @@ URL: https://github.com/shpaker/epyxid
 """
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Final, Optional, Union, final
 
-__version__: str
+__version__: Final[str]
 __all__ = [
     "__version__",
     "XIDError",
@@ -27,9 +27,12 @@ class XIDError(ValueError):
 
     This error is raised when attempting to create an XID from invalid
     string or bytes data, or when other XID operations encounter errors.
+
+    Subclasses ValueError, so ``except ValueError`` also catches it.
     """
 
 
+@final
 class XID:
     """
     Globally unique, sortable ID generator.
@@ -41,15 +44,21 @@ class XID:
     - 2-byte process ID
     - 3-byte counter
 
-    IDs are sortable by their creation time and are globally unique across
-    different machines and processes.
+    Ordering is the lexicographic order of the raw bytes, so IDs sort by
+    creation time with one-second granularity. Within the same second the
+    machine and process bytes decide the order, not the actual creation
+    order, so IDs from different processes are not ordered by creation
+    time below that resolution.
+
+    Note:
+        The embedded timestamp is a 32-bit value and wraps in 2106.
 
     Example:
         >>> xid = XID()
-        >>> print(xid)
-        'cu701mcr9ij74n2hajpg'
-        >>> print(xid.time)
-        2024-12-31 23:59:59
+        >>> len(str(xid))
+        20
+        >>> XID("9m4e2mr0ui3e8a215n4g").as_bytes()
+        b'M\\x88\\xe1[`\\xf4\\x86\\xe4(A-\\xc9'
     """
 
     def __new__(cls, value: Optional[Union[str, bytes]] = None) -> "XID":
@@ -58,18 +67,22 @@ class XID:
 
         Args:
             value: Optional string or bytes representation of an existing XID.
-                  If None, generates a new unique XID.
+                  If None, generates a new unique XID. Only str and bytes are
+                  accepted; other sequences raise TypeError.
 
         Returns:
             A new XID instance.
 
         Raises:
+            TypeError: If the value is neither str, bytes, nor None.
             XIDError: If the provided value is not a valid XID representation.
 
         Example:
             >>> xid1 = XID()  # Generate new ID
-            >>> xid2 = XID("cu701mcr9ij74n2hajpg")  # From string
-            >>> xid3 = XID(b'...')  # From bytes
+            >>> xid2 = XID("9m4e2mr0ui3e8a215n4g")  # From string
+            >>> xid3 = XID(b'M\\x88\\xe1[`\\xf4\\x86\\xe4(A-\\xc9')  # From bytes
+            >>> xid2 == xid3
+            True
         """
 
     def as_bytes(self) -> bytes:
@@ -121,6 +134,11 @@ class XID:
         """
         Extract the 2-byte process ID from the XID.
 
+        This is the OS process id truncated to 16 bits. Inside Linux
+        containers it is additionally XOR-ed with a hash of
+        ``/proc/self/cpuset``, so it does not necessarily equal
+        ``os.getpid()``.
+
         Returns:
             An integer representing the process ID (0-65535).
 
@@ -134,14 +152,20 @@ class XID:
         """
         Extract the timestamp from the XID.
 
+        The returned datetime is **naive and expressed in the local timezone**
+        of the machine reading it, even though the ID stores UTC seconds. Two
+        IDs one hour apart can therefore render identically across a DST fold,
+        and on Windows timestamps mapping to a pre-1970 local time raise
+        OSError.
+
         Returns:
-            A datetime object representing when the XID was created.
+            A naive datetime, in local time, of when the XID was created.
 
         Example:
             >>> xid = XID()
             >>> creation_time = xid.time
-            >>> print(creation_time)
-            2024-12-31 23:59:59
+            >>> creation_time.tzinfo is None
+            True
         """
 
     @property
@@ -160,6 +184,9 @@ class XID:
     def __hash__(self) -> int:
         """
         Return the hash value of the XID.
+
+        The hash is derived from the raw bytes through Python, so it follows
+        PYTHONHASHSEED randomization and differs between processes.
 
         Returns:
             An integer hash value suitable for use in sets and dictionaries.
@@ -193,23 +220,23 @@ class XID:
             A string in the format '<XID: xxxxx...>' containing the XID value.
         """
 
-    def __eq__(self, object: 'XID') -> bool:
-        """Return True if self == object."""
+    def __eq__(self, other: object, /) -> bool:
+        """Return True if self == other. Non-XID operands compare unequal."""
 
-    def __ne__(self, object: 'XID') -> bool:
-        """Return True if self != object."""
+    def __ne__(self, other: object, /) -> bool:
+        """Return True if self != other. Non-XID operands compare unequal."""
 
-    def __lt__(self, object: 'XID') -> bool:
-        """Return True if self < object (sorted by creation time)."""
+    def __lt__(self, other: "XID", /) -> bool:
+        """Return True if self < other (raw byte order)."""
 
-    def __le__(self, object: 'XID') -> bool:
-        """Return True if self <= object (sorted by creation time)."""
+    def __le__(self, other: "XID", /) -> bool:
+        """Return True if self <= other (raw byte order)."""
 
-    def __gt__(self, object: 'XID') -> bool:
-        """Return True if self > object (sorted by creation time)."""
+    def __gt__(self, other: "XID", /) -> bool:
+        """Return True if self > other (raw byte order)."""
 
-    def __ge__(self, object: 'XID') -> bool:
-        """Return True if self >= object (sorted by creation time)."""
+    def __ge__(self, other: "XID", /) -> bool:
+        """Return True if self >= other (raw byte order)."""
 
 
 def xid_create() -> XID:
@@ -222,10 +249,13 @@ def xid_create() -> XID:
     Returns:
         A new XID instance.
 
+    Raises:
+        XIDError: If the system clock is set before the Unix epoch.
+
     Example:
         >>> xid = xid_create()
-        >>> print(xid)
-        'cu701mcr9ij74n2hajpg'
+        >>> len(str(xid))
+        20
     """
 
 
@@ -243,7 +273,7 @@ def xid_from_str(s: str) -> XID:
         XIDError: If the string is not a valid XID representation.
 
     Example:
-        >>> xid = xid_from_str("cu701mcr9ij74n2hajpg")
+        >>> xid = xid_from_str("9m4e2mr0ui3e8a215n4g")
     """
 
 
@@ -261,5 +291,5 @@ def xid_from_bytes(b: bytes) -> XID:
         XIDError: If the bytes do not represent a valid XID.
 
     Example:
-        >>> xid = xid_from_bytes(b'...')
+        >>> xid = xid_from_bytes(b'M\\x88\\xe1[`\\xf4\\x86\\xe4(A-\\xc9')
     """
