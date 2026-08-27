@@ -1,3 +1,6 @@
+//! Python bindings for the [`xid`] crate: fast, globally unique,
+//! lexicographically sortable identifiers.
+
 use pyo3::prelude::{
     pymodule, wrap_pyfunction, Bound, PyModule, PyModuleMethods, PyResult, Python,
 };

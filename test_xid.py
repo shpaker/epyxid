@@ -1,3 +1,8 @@
+import os
+import pickle
+import sys
+from copy import copy, deepcopy
+from subprocess import check_output
 from typing import Union, Optional
 
 from epyxid import xid_from_bytes, xid_create, XID, XIDError, xid_from_str
@@ -174,3 +179,52 @@ def test_hash_equal_objects() -> None:
     xid1 = xid_from_bytes(XID_BYTES)
     xid2 = xid_from_bytes(XID_BYTES)
     assert hash(xid1) == hash(xid2)
+
+
+def test_equality_is_symmetric_with_foreign_types() -> None:
+    """Comparisons return NotImplemented for non-XID operands, so reflected ops run."""
+    from unittest import mock
+
+    assert XID_OBJ == mock.ANY
+    assert mock.ANY == XID_OBJ
+    assert XID_OBJ != 'not-an-xid'
+    assert not XID_OBJ == 'not-an-xid'
+
+
+@mark.parametrize(
+    ('roundtrip',),
+    [
+        param(lambda x: pickle.loads(pickle.dumps(x)), id='pickle'),
+        param(copy, id='copy'),
+        param(deepcopy, id='deepcopy'),
+    ],
+)
+def test_roundtrip_preserves_value(roundtrip) -> None:
+    restored = roundtrip(XID_OBJ)
+    assert restored == XID_OBJ
+    assert bytes(restored) == XID_BYTES
+
+
+def test_hash_matches_bytes_hash() -> None:
+    assert hash(XID_OBJ) == hash(XID_BYTES)
+
+
+def test_hash_is_randomized_per_process() -> None:
+    """__hash__ delegates to Python's bytes hash, so PYTHONHASHSEED changes it."""
+    code = 'from epyxid import xid_from_str; print(hash(xid_from_str("9m4e2mr0ui3e8a215n4g")))'
+
+    def hash_with_seed(seed: str) -> str:
+        env = {**os.environ, 'PYTHONHASHSEED': seed}
+        return check_output([sys.executable, '-c', code], env=env, text=True).strip()
+
+    assert hash_with_seed('1') != hash_with_seed('2')
+
+
+def test_sorting_follows_byte_order() -> None:
+    assert sorted([XID_LATER, XID_EARLIER]) == [XID_EARLIER, XID_LATER]
+    assert (XID_LATER < XID_EARLIER) is False
+    assert (XID_EARLIER < XID_LATER) is True
+
+
+def test_class_is_exposed_under_package_module() -> None:
+    assert XID.__module__ == 'epyxid'
