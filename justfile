@@ -17,3 +17,9 @@ stubs:
 lint:
   cargo fmt --check
   cargo clippy --all-targets --locked -- -D warnings
+
+hooks:
+  prek install
+
+hooks-run:
+  prek run --all-files
