@@ -2,10 +2,13 @@ import os
 import pickle
 import sys
 from copy import copy, deepcopy
+from datetime import datetime
+from importlib.metadata import version
+from threading import Lock, Thread
 from subprocess import check_output
 from typing import Union, Optional
 
-from epyxid import xid_from_bytes, xid_create, XID, XIDError, xid_from_str
+from epyxid import __version__, xid_from_bytes, xid_create, XID, XIDError, xid_from_str
 
 from pytest import raises, param, mark
 
@@ -30,7 +33,11 @@ XID_LATER = xid_from_bytes(bytes([0x4d, 0x88, 0xe1, 0x5c, 0x60, 0xf4, 0x86, 0xe4
     ],
 )
 def test_create_xid(creator) -> None:
-    assert creator() is not None
+    first, second = creator(), creator()
+    assert isinstance(first, XID)
+    assert len(bytes(first)) == 12
+    assert len(str(first)) == 20
+    assert first != second
 
 
 @mark.parametrize(
@@ -41,7 +48,9 @@ def test_create_xid(creator) -> None:
     ],
 )
 def test_create_xid_with_params(value: Optional[Union[str, bytes]]) -> None:
-    assert XID(value) is not None
+    parsed = XID(value)
+    assert bytes(parsed) == XID_BYTES
+    assert str(parsed) == XID_STR
 
 
 @mark.parametrize(
@@ -99,17 +108,20 @@ def test_conversion_methods(method, expected) -> None:
 
 
 def test_property_getters() -> None:
-    assert isinstance(XID_OBJ.machine, bytes)
-    assert isinstance(XID_OBJ.pid, int)
-    assert isinstance(XID_OBJ.time, object)
-    assert isinstance(XID_OBJ.counter, int)
+    """Each getter must expose the exact bytes embedded in the fixture ID."""
+    assert XID_OBJ.machine == XID_BYTES[4:7]
+    assert XID_OBJ.pid == int.from_bytes(XID_BYTES[7:9], 'big')
+    assert XID_OBJ.counter == int.from_bytes(XID_BYTES[9:12], 'big')
+    timestamp = int.from_bytes(XID_BYTES[:4], 'big')
+    assert XID_OBJ.time == datetime.fromtimestamp(timestamp)
+    assert XID_OBJ.time.tzinfo is None
 
 
 @mark.parametrize(
     ('xid1_factory', 'xid2_factory', 'expected_op'),
     [
         param(lambda: XID_OBJ, lambda: XID_OBJ, lambda a, b: a == b, id='comparison_eq'),
-        param(xid_create, xid_create, lambda a, b: a != b or a == b, id='comparison_ne'),
+        param(xid_create, xid_create, lambda a, b: a != b, id='comparison_ne'),
     ],
 )
 def test_comparison_basic(xid1_factory, xid2_factory, expected_op) -> None:
@@ -146,7 +158,7 @@ def test_comparison_operators(op, op_str: str) -> None:
     ],
 )
 def test_comparison_by_timestamp(op, expected: bool) -> None:
-    """XID comparison is based on timestamp (first 4 bytes), sorting by creation time."""
+    """Ordering is lexicographic over all 12 bytes; the timestamp is merely the first field."""
     assert XID_EARLIER.time < XID_LATER.time
     assert op(XID_EARLIER, XID_LATER) == expected
 
@@ -283,3 +295,42 @@ def test_error_message_escapes_control_characters() -> None:
     message = str(info.value)
     assert '\n' not in message
     assert '\\n' in message
+
+
+def test_generated_ids_are_unique() -> None:
+    """Uniqueness is the library's core guarantee, so pin it explicitly."""
+    ids = {str(xid_create()) for _ in range(10_000)}
+    assert len(ids) == 10_000
+
+
+def test_generated_ids_are_unique_across_threads() -> None:
+    results: 'list[list[str]]' = []
+    lock = Lock()
+
+    def worker() -> None:
+        batch = [str(xid_create()) for _ in range(5_000)]
+        with lock:
+            results.append(batch)
+
+    threads = [Thread(target=worker) for _ in range(8)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    generated = [xid for batch in results for xid in batch]
+    assert len(generated) == 40_000
+    assert len(set(generated)) == 40_000
+
+
+def test_generated_ids_sort_by_creation_order() -> None:
+    generated = [xid_create() for _ in range(1_000)]
+    assert generated == sorted(generated)
+
+
+def test_version_matches_distribution_metadata() -> None:
+    assert __version__ == version('epyxid')
+
+
+def test_xid_error_subclasses_value_error() -> None:
+    assert issubclass(XIDError, ValueError)
