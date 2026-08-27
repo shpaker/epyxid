@@ -1,7 +1,7 @@
 # ePyXID
 
-[![PyPI](https://img.shields.io/pypi/v/epyxid.svg)](https://pypi.python.org/pypi/epyxid)
-[![PyPI](https://img.shields.io/pypi/dm/epyxid.svg)](https://pypi.python.org/pypi/epyxid)
+[![PyPI version](https://img.shields.io/pypi/v/epyxid.svg)](https://pypi.org/project/epyxid/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/epyxid.svg)](https://pypi.org/project/epyxid/)
 
 Fast, globally unique, and sortable ID generator.
 
@@ -11,13 +11,15 @@ The original xid implementation is [rs/xid](https://github.com/rs/xid) written i
 
 ## Features
 
-- **Globally Unique**: Each ID is unique across space and time.
-- **Sortable**: IDs are sortable by their creation time.
+- **Globally Unique**: Each ID combines a timestamp, a machine identifier, a process identifier and a counter.
+- **Sortable**: IDs sort by creation time with one-second granularity.
+- **Compact**: 12 bytes, or 20 characters in its base32-hex form.
 - **Fast**: Implemented in Rust for maximum performance using PyO3. See [performance benchmarks](https://github.com/shpaker/python-id-benchmarks) comparing ePyXID with other Python ID generation libraries.
+- **Typed**: Ships type stubs and `py.typed`.
 
 ## Installation
 
-Install ePyXID using pip:
+Requires Python 3.10 or newer.
 
 ```shell
 pip install epyxid
@@ -25,53 +27,61 @@ pip install epyxid
 
 ## Quick Start
 
-Generate and use ePyXID in your Python projects:
-
 ```python
-from epyxid import XID
+from epyxid import XID, XIDError
 
-# Create a new XID
+# Generate a new ID
 xid = XID()
-print(f"{xid!r}")
-# <XID: cu701mcr9ij74n2hajpg>
+print(repr(xid))
+print(xid.time)
 
-# Create an XID from a string
-xid_str = XID("cnisffq7qo0qnbtbu5gg")
-print(f"XID from string: {xid_str}")
+# Parse an existing ID from its string or binary form
+from_str = XID('9m4e2mr0ui3e8a215n4g')
+from_bytes = XID(b'\x4d\x88\xe1\x5b\x60\xf4\x86\xe4\x28\x41\x2d\xc9')
+print(from_str == from_bytes)
+# True
 
-# Create an XID from bytes
-xid_bytes = XID(b'e\xe5\xc7\xbfG\xd6\x01\xab\xaf\xab\xf1a')
-print(f"XID from bytes: {xid_bytes}")
+# Convert back
+print(from_str.to_str())
+# 9m4e2mr0ui3e8a215n4g
+print(from_str.as_bytes())
+# b'M\x88\xe1[`\xf4\x86\xe4(A-\xc9'
 
-# Print the XID as a string
-print(f"XID: {str(xid)}")
-#  or
-print(f"XID: {xid.to_str()}")
-# XID: cnisffq7qo0qnbtbu5gg
+# Inspect the embedded fields
+print(from_str.machine, from_str.pid, from_str.counter)
+# b'`\xf4\x86' 58408 4271561
 
-# Get the byte representation of the XID
-print(f"Bytes: {bytes(xid)}")
-# or
-print(f"Bytes: {xid.as_bytes()}")
-# Bytes: b'e\xe5\xc7\xbfG\xd6\x01\xab\xaf\xab\xf1a'
+# IDs are ordered, hashable and picklable
+print(XID() < XID())
+# True
+print(len({from_str, from_bytes}))
+# 1
 
-# Access the creation time of the XID
-print(f"Creation Time: {xid.time}")
-# Creation Time: 2024-12-31 23:59:59
+# Invalid input raises XIDError, a subclass of ValueError
+try:
+    XID('not-an-xid')
+except XIDError as error:
+    print(error)
+# invalid XID string "not-an-xid": expected 20 characters, got 10
+```
 
-# Compare XIDs
-xid1 = XID()
-xid2 = XID()
-print(f"XID1 < XID2: {xid1 < xid2}")
+Only `str` and `bytes` are accepted; anything else raises `TypeError`.
 
-# Use XIDs in a set
-xid_set = {xid1, xid2}
-print(f"XID Set: {xid_set}")
+## Development
+
+Requires a Rust toolchain, [just](https://github.com/casey/just) and [prek](https://github.com/j178/prek).
+
+```shell
+just venv    # create .venv with maturin, pytest and mypy
+just hooks   # install git hooks
+just tests   # build the wheel and run the test suite
+just stubs   # type-check the stubs against the built module
+just lint    # cargo fmt and clippy
 ```
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+Contributions are welcome! Please open an issue or submit a pull request on [GitHub](https://github.com/shpaker/epyxid).
 
 ## License
 

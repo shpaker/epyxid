@@ -1,9 +1,13 @@
 import os
 import pickle
 import sys
+from contextlib import redirect_stdout
 from copy import copy, deepcopy
 from datetime import datetime
 from importlib.metadata import version
+from io import StringIO
+from pathlib import Path
+from re import DOTALL, findall
 from threading import Lock, Thread
 from subprocess import check_output
 
@@ -333,3 +337,42 @@ def test_version_matches_distribution_metadata() -> None:
 
 def test_xid_error_subclasses_value_error() -> None:
     assert issubclass(XIDError, ValueError)
+
+
+README = Path(__file__).parent / 'README.md'
+
+
+def _readme_example() -> 'tuple[str, list[str]]':
+    """Return the Quick Start snippet and the outputs its comments promise.
+
+    A comment counts as an expected output only when it directly follows a
+    ``print`` call or another such comment; comments after a blank line are
+    prose.
+    """
+    block = findall(r'```python\n(.*?)```', README.read_text(), DOTALL)[0]
+    expected, previous_is_output = [], False
+    for line in block.splitlines():
+        stripped = line.strip()
+        if stripped.startswith('#'):
+            if previous_is_output:
+                expected.append(stripped[1:].strip())
+            continue
+        previous_is_output = stripped.startswith('print(')
+    return block, expected
+
+
+@mark.skipif(not README.exists(), reason='README.md is not distributed here')
+def test_readme_example_runs_and_matches_its_output() -> None:
+    """The documented snippet must execute and print exactly what it claims."""
+    block, expected = _readme_example()
+    assert expected, 'no expected outputs found in the README example'
+
+    captured = StringIO()
+    with redirect_stdout(captured):
+        exec(compile(block, str(README), 'exec'), {})
+    printed = captured.getvalue().splitlines()
+
+    remaining = list(printed)
+    for line in expected:
+        assert line in remaining, f'README promises {line!r}, got {printed!r}'
+        remaining = remaining[remaining.index(line) + 1:]
