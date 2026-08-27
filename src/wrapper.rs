@@ -1,19 +1,15 @@
 use std::time::UNIX_EPOCH;
 
-use pyo3::types::{PyAnyMethods, PyBytes, PyDateTime, PyType};
-use pyo3::{pyclass, pymethods, Bound, FromPyObject, PyResult, Python};
+use pyo3::exceptions::PyTypeError;
+use pyo3::types::{
+    PyAny, PyAnyMethods, PyBytes, PyBytesMethods, PyDateTime, PyString, PyStringMethods, PyType,
+    PyTypeMethods,
+};
+use pyo3::{pyclass, pymethods, Bound, PyResult, Python};
 use xid::Id;
 
 use crate::errors::XIDError;
-use crate::utils::{xid_create, xid_from_bytes, xid_from_str};
-
-#[derive(FromPyObject)]
-enum XIDReprTypes {
-    #[pyo3(transparent, annotation = "str")]
-    String(String),
-    #[pyo3(transparent, annotation = "bytes")]
-    Bytes(Vec<u8>),
-}
+use crate::utils::{parse_bytes, parse_str, xid_create};
 
 /// Globally unique, sortable identifier.
 ///
@@ -31,16 +27,28 @@ pub struct XID(pub Id);
 
 #[pymethods]
 impl XID {
+    /// Create an XID from `str` or `bytes`, or generate a new one when omitted.
     #[new]
-    #[pyo3(signature = (data=None))]
-    fn py_new(data: Option<XIDReprTypes>) -> PyResult<XID> {
-        match data {
-            None => xid_create(),
-            Some(repr_value) => match repr_value {
-                XIDReprTypes::String(value) => xid_from_str(value.as_str()),
-                XIDReprTypes::Bytes(value) => xid_from_bytes(value),
-            },
+    #[pyo3(signature = (value=None))]
+    fn py_new(value: Option<&Bound<'_, PyAny>>) -> PyResult<XID> {
+        let Some(value) = value else {
+            return xid_create();
+        };
+        if let Ok(text) = value.cast::<PyString>() {
+            // `to_cow` (unlike `to_str`) is available under the limited API; it
+            // fails only for strings carrying surrogates, which are never XIDs.
+            let text = text
+                .to_cow()
+                .map_err(|_| XIDError::new_err("invalid XID string: not valid UTF-8"))?;
+            return parse_str(&text).map(XID);
         }
+        if let Ok(raw) = value.cast::<PyBytes>() {
+            return parse_bytes(raw.as_bytes()).map(XID);
+        }
+        Err(PyTypeError::new_err(format!(
+            "XID() argument must be str or bytes, not '{}'",
+            value.get_type().name()?
+        )))
     }
 
     /// Return the 12-byte binary representation.

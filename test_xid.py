@@ -80,7 +80,7 @@ def test_from_valid(func, input_value, expected) -> None:
     ],
 )
 def test_from_invalid(func, invalid_value) -> None:
-    with raises(ValueError):
+    with raises(XIDError):
         func(invalid_value)
 
 
@@ -228,3 +228,58 @@ def test_sorting_follows_byte_order() -> None:
 
 def test_class_is_exposed_under_package_module() -> None:
     assert XID.__module__ == 'epyxid'
+
+
+def test_create_xid_accepts_value_keyword() -> None:
+    assert XID(value=XID_STR) == XID_COMPARISON_1
+
+
+@mark.parametrize(
+    ('value',),
+    [
+        param(list(XID_BYTES), id='list'),
+        param(tuple(XID_BYTES), id='tuple'),
+        param(range(12), id='range'),
+        param(bytearray(XID_BYTES), id='bytearray'),
+    ],
+)
+def test_create_xid_rejects_non_str_bytes(value) -> None:
+    """Only str and bytes are accepted; int sequences must not become IDs."""
+    with raises(TypeError):
+        XID(value)
+    with raises(TypeError):
+        xid_from_bytes(value)
+
+
+def test_surrogate_string_raises_xid_error() -> None:
+    """A str that is not valid UTF-8 is an invalid XID, not a type error."""
+    with raises(XIDError):
+        XID(b'caf\xe9'.decode('utf-8', 'surrogateescape'))
+
+
+@mark.parametrize(
+    ('value', 'expected_fragment'),
+    [
+        param('42', 'expected 20 characters, got 2', id='short_str'),
+        param('9z4e2mr0ui3e8a215n4g', 'expected characters from [0-9a-v] only', id='bad_char'),
+    ],
+)
+def test_string_error_messages_are_actionable(value: str, expected_fragment: str) -> None:
+    with raises(XIDError) as info:
+        XID(value)
+    assert expected_fragment in str(info.value)
+
+
+def test_bytes_error_message_reports_length() -> None:
+    with raises(XIDError) as info:
+        XID(XID_BYTES[:11])
+    assert 'expected exactly 12 bytes, got 11' in str(info.value)
+
+
+def test_error_message_escapes_control_characters() -> None:
+    """Untrusted input is escaped so it cannot forge log lines."""
+    with raises(XIDError) as info:
+        XID('cnisffq7qo0qnbtbu5g\n')
+    message = str(info.value)
+    assert '\n' not in message
+    assert '\\n' in message
