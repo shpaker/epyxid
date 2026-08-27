@@ -1,6 +1,6 @@
 [package]
 name = "epyxid"
-version = "0.3.5"
+version = "0.3.6"
 edition = "2021"
 description = "Python wrapper around Rust implementation of XID (Globally Unique ID Generator)"
 license = "MIT"
@@ -16,8 +16,6 @@ exclude = [
     "__pycache__/",
     ".gitignore",
     ".pre-commit-config.yaml",
-    "justfile",
-    "test_xid.py",
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -26,7 +24,7 @@ name = "epyxid"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "^0.27", features = ["extension-module"] }
+pyo3 = { version = "0.29.2", features = ["abi3-py38"] }
 xid = "1.1.1"
 
 [profile.release]
