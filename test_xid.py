@@ -1,6 +1,17 @@
-from typing import Union, Optional
+import os
+import pickle
+import sys
+from contextlib import redirect_stdout
+from copy import copy, deepcopy
+from datetime import datetime
+from importlib.metadata import version
+from io import StringIO
+from pathlib import Path
+from re import DOTALL, findall
+from threading import Lock, Thread
+from subprocess import check_output
 
-from epyxid import xid_from_bytes, xid_create, XID, XIDError, xid_from_str
+from epyxid import __version__, xid_from_bytes, xid_create, XID, XIDError, xid_from_str
 
 from pytest import raises, param, mark
 
@@ -25,7 +36,11 @@ XID_LATER = xid_from_bytes(bytes([0x4d, 0x88, 0xe1, 0x5c, 0x60, 0xf4, 0x86, 0xe4
     ],
 )
 def test_create_xid(creator) -> None:
-    assert creator() is not None
+    first, second = creator(), creator()
+    assert isinstance(first, XID)
+    assert len(bytes(first)) == 12
+    assert len(str(first)) == 20
+    assert first != second
 
 
 @mark.parametrize(
@@ -35,8 +50,10 @@ def test_create_xid(creator) -> None:
         param(XID_STR),
     ],
 )
-def test_create_xid_with_params(value: Optional[Union[str, bytes]]) -> None:
-    assert XID(value) is not None
+def test_create_xid_with_params(value: str | bytes) -> None:
+    parsed = XID(value)
+    assert bytes(parsed) == XID_BYTES
+    assert str(parsed) == XID_STR
 
 
 @mark.parametrize(
@@ -75,7 +92,7 @@ def test_from_valid(func, input_value, expected) -> None:
     ],
 )
 def test_from_invalid(func, invalid_value) -> None:
-    with raises(ValueError):
+    with raises(XIDError):
         func(invalid_value)
 
 
@@ -94,17 +111,20 @@ def test_conversion_methods(method, expected) -> None:
 
 
 def test_property_getters() -> None:
-    assert isinstance(XID_OBJ.machine, bytes)
-    assert isinstance(XID_OBJ.pid, int)
-    assert isinstance(XID_OBJ.time, object)
-    assert isinstance(XID_OBJ.counter, int)
+    """Each getter must expose the exact bytes embedded in the fixture ID."""
+    assert XID_OBJ.machine == XID_BYTES[4:7]
+    assert XID_OBJ.pid == int.from_bytes(XID_BYTES[7:9], 'big')
+    assert XID_OBJ.counter == int.from_bytes(XID_BYTES[9:12], 'big')
+    timestamp = int.from_bytes(XID_BYTES[:4], 'big')
+    assert XID_OBJ.time == datetime.fromtimestamp(timestamp)
+    assert XID_OBJ.time.tzinfo is None
 
 
 @mark.parametrize(
     ('xid1_factory', 'xid2_factory', 'expected_op'),
     [
         param(lambda: XID_OBJ, lambda: XID_OBJ, lambda a, b: a == b, id='comparison_eq'),
-        param(xid_create, xid_create, lambda a, b: a != b or a == b, id='comparison_ne'),
+        param(xid_create, xid_create, lambda a, b: a != b, id='comparison_ne'),
     ],
 )
 def test_comparison_basic(xid1_factory, xid2_factory, expected_op) -> None:
@@ -141,7 +161,7 @@ def test_comparison_operators(op, op_str: str) -> None:
     ],
 )
 def test_comparison_by_timestamp(op, expected: bool) -> None:
-    """XID comparison is based on timestamp (first 4 bytes), sorting by creation time."""
+    """Ordering is lexicographic over all 12 bytes; the timestamp is merely the first field."""
     assert XID_EARLIER.time < XID_LATER.time
     assert op(XID_EARLIER, XID_LATER) == expected
 
@@ -174,3 +194,185 @@ def test_hash_equal_objects() -> None:
     xid1 = xid_from_bytes(XID_BYTES)
     xid2 = xid_from_bytes(XID_BYTES)
     assert hash(xid1) == hash(xid2)
+
+
+def test_equality_is_symmetric_with_foreign_types() -> None:
+    """Comparisons return NotImplemented for non-XID operands, so reflected ops run."""
+    from unittest import mock
+
+    assert XID_OBJ == mock.ANY
+    assert mock.ANY == XID_OBJ
+    assert XID_OBJ != 'not-an-xid'
+    assert not XID_OBJ == 'not-an-xid'
+
+
+@mark.parametrize(
+    ('roundtrip',),
+    [
+        param(lambda x: pickle.loads(pickle.dumps(x)), id='pickle'),
+        param(copy, id='copy'),
+        param(deepcopy, id='deepcopy'),
+    ],
+)
+def test_roundtrip_preserves_value(roundtrip) -> None:
+    restored = roundtrip(XID_OBJ)
+    assert restored == XID_OBJ
+    assert bytes(restored) == XID_BYTES
+
+
+def test_hash_matches_bytes_hash() -> None:
+    assert hash(XID_OBJ) == hash(XID_BYTES)
+
+
+def test_hash_is_randomized_per_process() -> None:
+    """__hash__ delegates to Python's bytes hash, so PYTHONHASHSEED changes it."""
+    code = 'from epyxid import xid_from_str; print(hash(xid_from_str("9m4e2mr0ui3e8a215n4g")))'
+
+    def hash_with_seed(seed: str) -> str:
+        env = {**os.environ, 'PYTHONHASHSEED': seed}
+        return check_output([sys.executable, '-c', code], env=env, text=True).strip()
+
+    assert hash_with_seed('1') != hash_with_seed('2')
+
+
+def test_sorting_follows_byte_order() -> None:
+    assert sorted([XID_LATER, XID_EARLIER]) == [XID_EARLIER, XID_LATER]
+    assert (XID_LATER < XID_EARLIER) is False
+    assert (XID_EARLIER < XID_LATER) is True
+
+
+def test_class_is_exposed_under_package_module() -> None:
+    assert XID.__module__ == 'epyxid'
+
+
+def test_create_xid_accepts_value_keyword() -> None:
+    assert XID(value=XID_STR) == XID_COMPARISON_1
+
+
+@mark.parametrize(
+    ('value',),
+    [
+        param(list(XID_BYTES), id='list'),
+        param(tuple(XID_BYTES), id='tuple'),
+        param(range(12), id='range'),
+        param(bytearray(XID_BYTES), id='bytearray'),
+    ],
+)
+def test_create_xid_rejects_non_str_bytes(value) -> None:
+    """Only str and bytes are accepted; int sequences must not become IDs."""
+    with raises(TypeError):
+        XID(value)
+    with raises(TypeError):
+        xid_from_bytes(value)
+
+
+def test_surrogate_string_raises_xid_error() -> None:
+    """A str that is not valid UTF-8 is an invalid XID, not a type error."""
+    with raises(XIDError):
+        XID(b'caf\xe9'.decode('utf-8', 'surrogateescape'))
+
+
+@mark.parametrize(
+    ('value', 'expected_fragment'),
+    [
+        param('42', 'expected 20 characters, got 2', id='short_str'),
+        param('9z4e2mr0ui3e8a215n4g', 'expected characters from [0-9a-v] only', id='bad_char'),
+    ],
+)
+def test_string_error_messages_are_actionable(value: str, expected_fragment: str) -> None:
+    with raises(XIDError) as info:
+        XID(value)
+    assert expected_fragment in str(info.value)
+
+
+def test_bytes_error_message_reports_length() -> None:
+    with raises(XIDError) as info:
+        XID(XID_BYTES[:11])
+    assert 'expected exactly 12 bytes, got 11' in str(info.value)
+
+
+def test_error_message_escapes_control_characters() -> None:
+    """Untrusted input is escaped so it cannot forge log lines."""
+    with raises(XIDError) as info:
+        XID('cnisffq7qo0qnbtbu5g\n')
+    message = str(info.value)
+    assert '\n' not in message
+    assert '\\n' in message
+
+
+def test_generated_ids_are_unique() -> None:
+    """Uniqueness is the library's core guarantee, so pin it explicitly."""
+    ids = {str(xid_create()) for _ in range(10_000)}
+    assert len(ids) == 10_000
+
+
+def test_generated_ids_are_unique_across_threads() -> None:
+    results: list[list[str]] = []
+    lock = Lock()
+
+    def worker() -> None:
+        batch = [str(xid_create()) for _ in range(5_000)]
+        with lock:
+            results.append(batch)
+
+    threads = [Thread(target=worker) for _ in range(8)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    generated = [xid for batch in results for xid in batch]
+    assert len(generated) == 40_000
+    assert len(set(generated)) == 40_000
+
+
+def test_generated_ids_sort_by_creation_order() -> None:
+    generated = [xid_create() for _ in range(1_000)]
+    assert generated == sorted(generated)
+
+
+def test_version_matches_distribution_metadata() -> None:
+    assert __version__ == version('epyxid')
+
+
+def test_xid_error_subclasses_value_error() -> None:
+    assert issubclass(XIDError, ValueError)
+
+
+README = Path(__file__).parent / 'README.md'
+
+
+def _readme_example() -> 'tuple[str, list[str]]':
+    """Return the Quick Start snippet and the outputs its comments promise.
+
+    A comment counts as an expected output only when it directly follows a
+    ``print`` call or another such comment; comments after a blank line are
+    prose.
+    """
+    block = findall(r'```python\n(.*?)```', README.read_text(), DOTALL)[0]
+    expected, previous_is_output = [], False
+    for line in block.splitlines():
+        stripped = line.strip()
+        if stripped.startswith('#'):
+            if previous_is_output:
+                expected.append(stripped[1:].strip())
+            continue
+        previous_is_output = stripped.startswith('print(')
+    return block, expected
+
+
+@mark.skipif(not README.exists(), reason='README.md is not distributed here')
+def test_readme_example_runs_and_matches_its_output() -> None:
+    """The documented snippet must execute and print exactly what it claims."""
+    block, expected = _readme_example()
+    assert expected, 'no expected outputs found in the README example'
+
+    captured = StringIO()
+    with redirect_stdout(captured):
+        exec(compile(block, str(README), 'exec'), {})
+    printed = captured.getvalue().splitlines()
+
+    remaining = list(printed)
+    for line in expected:
+        assert line in remaining, f'README promises {line!r}, got {printed!r}'
+        remaining = remaining[remaining.index(line) + 1:]

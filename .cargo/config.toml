@@ -1,0 +1,5 @@
+[env]
+# pyo3 probes `python` before `python3`; on hosts where `python` is an older
+# interpreter than the abi3 floor the build script refuses to run. Cargo does
+# not override an already-set value, so PYO3_PYTHON stays overridable.
+PYO3_PYTHON = "python3"

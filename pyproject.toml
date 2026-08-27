@@ -1,13 +1,14 @@
 [project]
 name = "epyxid"
 description = "Python wrapper around Rust implementation of XID (Globally Unique ID Generator)"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [
   {name = "Aleksandr Shpak", email = "shpaker@gmail.com"},
 ]
-version = "0.3.5"
+dynamic = ["version"]
 readme = "README.md"
-license = { file = "LICENSE.txt" }
+license = "MIT"
+license-files = ["LICENSE.txt"]
 keywords = [
   "rust",
   "xid",
@@ -15,20 +16,17 @@ keywords = [
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Rust",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
   "Operating System :: POSIX :: Linux",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: MacOS",
@@ -40,17 +38,15 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/shpaker/epyxid"
 Repository = "https://github.com/shpaker/epyxid"
+Issues = "https://github.com/shpaker/epyxid/issues"
 
 [build-system]
-requires = ["maturin>=1.0,<2.0"]
+requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]
-manifest-path = "Cargo.toml"
 module-name = "epyxid"
+features = ["pyo3/extension-module"]
 
-[tool.maturin.target."x86_64-apple-darwin"]
-macos-deployment-target = "10.12"
-
-[tool.maturin.target."aarch64-apple-darwin"]
-macos-deployment-target = "11.0"
+[tool.pytest.ini_options]
+filterwarnings = ["error"]
