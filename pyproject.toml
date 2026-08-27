@@ -7,7 +7,8 @@ authors = [
 ]
 dynamic = ["version"]
 readme = "README.md"
-license = { file = "LICENSE.txt" }
+license = "MIT"
+license-files = ["LICENSE.txt"]
 keywords = [
   "rust",
   "xid",
@@ -15,7 +16,6 @@ keywords = [
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Rust",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
@@ -27,7 +27,6 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: 3.15",
   "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
   "Operating System :: POSIX :: Linux",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: MacOS",
@@ -46,15 +45,8 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]
-manifest-path = "Cargo.toml"
 module-name = "epyxid"
 features = ["pyo3/extension-module"]
-
-[tool.maturin.target."x86_64-apple-darwin"]
-macos-deployment-target = "10.12"
-
-[tool.maturin.target."aarch64-apple-darwin"]
-macos-deployment-target = "11.0"
 
 [tool.pytest.ini_options]
 filterwarnings = ["error"]
